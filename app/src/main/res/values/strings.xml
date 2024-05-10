@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">ProgressionPal</string>
+    <string name="happy_birthday_sam">Happy Birthday, Sam!</string>
+    <string name="signature_text">From Emma</string>
+    <string name="interval_unison">Unison</string>
+    <string name="interval_minor_second">Minor Second</string>
+    <string name="interval_major_second">Major Second</string>
+    <string name="interval_minor_third">Minor Third</string>
+    <string name="interval_major_third">Major Third</string>
+    <string name="interval_perfect_fourth">Perfect Fourth</string>
+    <string name="interval_diminished_fifth">Diminished Fifth</string>
+    <string name="interval_perfect_fifth">Perfect Fifth</string>
+    <string name="interval_minor_sixth">Minor Sixth</string>
+    <string name="interval_major_sixth">Major Sixth</string>
+    <string name="interval_minor_seventh">Minor Seventh</string>
+    <string name="interval_major_seventh">Major Seventh</string>
+    <string name="interval_octave">Octave</string>
+    <string name="note_c">C</string>
+    <string name="note_d">D</string>
+    <string name="note_e">E</string>
+    <string name="note_f">F</string>
+    <string name="note_g">G</string>
+    <string name="note_a">A</string>
+    <string name="note_b">B</string>
+</resources>
