@@ -109,17 +109,25 @@ class UnitTests {
         result = chordHelper.identifyChord(mutableListOf("G", "C", "E", "A"))
         assertEquals(result, "C6")
         result = chordHelper.identifyChord(mutableListOf("A", "C", "Eb"))
-        assertEquals(result, "Adim")
+        assertEquals("Adim", result)
         result = chordHelper.identifyChord(mutableListOf("C", "A", "Eb"))
         assertEquals(result, "Adim")
         result = chordHelper.identifyChord(mutableListOf("A", "Eb", "C", "G"))
-        assertEquals(result, "Am7b5")
+        assertEquals("Am7b5", result)
         result = chordHelper.identifyChord(mutableListOf("Gb", "A", "Eb", "C"))
         assertEquals(result, "Adim7")
         result = chordHelper.identifyChord(mutableListOf("A", "B", "E"))
         assertEquals(result, "Asus2")
         result = chordHelper.identifyChord(mutableListOf("A", "D", "E"))
         assertEquals(result, "Asus4")
+        result = chordHelper.identifyChord(mutableListOf("A", "B", "E", "G"))
+        assertEquals("A7sus2", result)
+        result = chordHelper.identifyChord(mutableListOf("G", "E", "B", "A"))
+        assertEquals("A7sus2", result)
+        result = chordHelper.identifyChord(mutableListOf("C#", "A"))
+        assertEquals("A", result)
+        result = chordHelper.identifyChord(mutableListOf("C#", "A", "G"))
+        assertEquals("A7", result)
     }
 
     @Test
@@ -146,5 +154,8 @@ class UnitTests {
         assertEquals("Ddim", result)
         result = scale.getChordAtDegree(1, seventh = true)
         assertEquals("Dm7b5", result)
+        scale = Scale("F#", Mode.LYDIAN)
+        result = scale.getChordAtDegree(6, true)
+        assertEquals("E#m7", result)
     }
 }

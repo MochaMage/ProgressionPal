@@ -34,6 +34,10 @@ class ChordHelper {
                                           Interval.MAJOR_THIRD,
                                           Interval.PERFECT_FIFTH,
                                           Interval.MAJOR_SEVENTH)
+    private val minorSeventhChord = setOf(Interval.UNISON,
+                                          Interval.MINOR_THIRD,
+                                          Interval.PERFECT_FIFTH,
+                                          Interval.MINOR_SEVENTH)
     private val diminishedSeventhChord = setOf(Interval.UNISON,
                                                 Interval.MINOR_THIRD,
                                                 Interval.DIMINISHED_FIFTH,
@@ -44,13 +48,14 @@ class ChordHelper {
                                         Interval.MAJOR_SIXTH)
 
     fun getNotesForChord(chordName: String): MutableList<String> {
-        val chordRegex = "^([a-gA-G])([b#])?(m|\\+|dim7|sus[2,4]|m7b5|dim)?(M7|7|9|11|13)?$"
+        val chordRegex = "^([a-gA-G])([b#])?(m|\\+|dim7|m7b5|dim)?(M7|7|9|11|13)?(sus[2,4])?$"
         val regex = Regex(chordRegex)
         val results = regex.find(chordName)
         val rootNoteGroup = results?.groups?.get(1)
         val accidentalGroup = results?.groups?.get(2)
         val qualityGroup = results?.groups?.get(3)
         val extensionGroup = results?.groups?.get(4)
+        val suspendedGroup = results?.groups?.get(5)
 
         var rootNote = rootNoteGroup!!.value
         if(accidentalGroup != null){
@@ -71,16 +76,16 @@ class ChordHelper {
             chordNotes = getNotesForChord(rootNote, halfDiminishedChord)
         } else if (qualityGroup.value == "dim7"){
             chordNotes = getNotesForChord(rootNote, diminishedSeventhChord)
-        } else if (qualityGroup.value.startsWith("sus")){
-            if(qualityGroup.value == "sus4") {
-                chordNotes = getNotesForChord(rootNote, suspendedFourChord)
+        } else if (suspendedGroup != null){
+            chordNotes = if(suspendedGroup.value == "sus4") {
+                getNotesForChord(rootNote, suspendedFourChord)
             } else {
-                chordNotes = getNotesForChord(rootNote, suspendedTwoChord)
+                getNotesForChord(rootNote, suspendedTwoChord)
             }
         }
 
         if(extensionGroup != null) {
-            var extensions = getExtensionNotes(rootNote, extensionGroup.value)
+            val extensions = getExtensionNotes(rootNote, extensionGroup.value)
             chordNotes.addAll(extensions)
         }
 
@@ -109,6 +114,15 @@ class ChordHelper {
         return extensionNotes
     }
 
+    private fun reorderNotes(notes: MutableList<String>,
+                             intervals: MutableList<Interval>,
+                             interval: Interval): MutableList<String>{
+        val idx = intervals.indexOf(interval)
+        val removedNote = notes.removeAt(idx)
+        notes.add(0, removedNote)
+        return notes
+    }
+
     fun identifyChord(notes: MutableList<String>): String {
         val firstNote = notes[0]
         val otherNotes = notes.slice(1..<notes.size)
@@ -120,46 +134,53 @@ class ChordHelper {
         }
 
         //Special case: Sixth chords
-        if(intervals.containsAll(majorSixthChord)){
+        if (intervals.containsAll(majorSixthChord)) {
             return "${notes[0]}6"
         }
 
         // If sixths are found and were not handled by the special case above,
         // we invert them until we get the root in the first position
+        // Same goes for a chord containing both a third and a fourth. Invert it until we get the
+        // expected sus chord.
         if (intervals.contains(Interval.MINOR_SIXTH)) {
-            val sixthIdx = intervals.indexOf(Interval.MINOR_SIXTH)
-            val removedNote = notes.removeAt(sixthIdx)
-            notes.add(0, removedNote)
-            return identifyChord(notes)
-        } else if (intervals.contains(Interval.MAJOR_SIXTH)){
-            val sixthIdx = intervals.indexOf(Interval.MAJOR_SIXTH)
-            val removedNote = notes.removeAt(sixthIdx)
-            notes.add(0, removedNote)
-            return identifyChord(notes)
+            return identifyChord(reorderNotes(notes, intervals, Interval.MINOR_SIXTH))
+        } else if (intervals.contains(Interval.MAJOR_SIXTH)) {
+            return identifyChord(reorderNotes(notes, intervals, Interval.MAJOR_SIXTH))
+        } else if (intervals.contains(Interval.PERFECT_FOURTH) && (intervals.contains(Interval.MINOR_THIRD) || intervals.contains(Interval.MAJOR_THIRD))){
+            return identifyChord(reorderNotes(notes, intervals, Interval.PERFECT_FOURTH))
         }
         val rootNote = notes[0]
-        if (intervals.containsAll(diminishedSeventhChord)) {
-            return "${rootNote}dim7"
-        } else if (intervals.containsAll(halfDiminishedChord)) {
-            return "${rootNote}m7b5"
-        } else if (intervals.containsAll(suspendedTwoChord)){
-            return "${rootNote}sus2"
-        } else if (intervals.containsAll(suspendedFourChord)){
-            return "${rootNote}sus4"
-        } else if (intervals.containsAll(dominantSeventhChord)) {
-            return "${rootNote}7"
-        } else if(intervals.containsAll(majorSeventhChord)) {
-            return "${rootNote}M7"
-        } else if (intervals.containsAll(majorChord)) {
-            return rootNote
-        } else if (intervals.containsAll(minorChord)) {
-            return "${rootNote}m"
-        } else if (intervals.containsAll(augmentedChord)) {
-            return "${rootNote}+"
-        } else if (intervals.containsAll(diminishedChord)) {
-            return "${rootNote}dim"
+        var seventhType = ""
+        var suspensionType = ""
+        var qualityType = ""
+
+        if (intervals.contains(Interval.MINOR_SEVENTH)) {
+            seventhType = "7"
+        } else if (intervals.contains(Interval.MAJOR_SEVENTH)) {
+            seventhType = "M7"
         }
 
-        return "no chord found"
+        if (intervals.contains(Interval.AUGMENTED_FIFTH)) {
+            qualityType = "+"
+        } else if (intervals.contains(Interval.DIMINISHED_FIFTH)) {
+            if (intervals.contains(Interval.MINOR_SEVENTH)) {
+
+                seventhType = "m7b5"
+            } else if (intervals.contains(Interval.DIMINISHED_SEVENTH)) {
+                seventhType = "dim7"
+            } else {
+                qualityType = "dim"
+            }
+        } else {
+            if (intervals.contains(Interval.MINOR_THIRD)) {
+                qualityType = "m"
+            } else if (intervals.contains(Interval.MAJOR_SECOND)) {
+                suspensionType = "sus2"
+            } else if (intervals.contains(Interval.PERFECT_FOURTH)) {
+                suspensionType = "sus4"
+            }
+        }
+
+        return "${rootNote}${qualityType}${seventhType}${suspensionType}"
     }
 }
