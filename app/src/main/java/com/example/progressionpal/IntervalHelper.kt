@@ -84,16 +84,8 @@ class IntervalHelper {
     fun getNoteAtInterval(noteName: String, interval: Interval): String {
         val noteValue = getNoteValue(noteName)
         val rootIdx = notes.indexOf(noteName[0])
-        var newNoteIdx = rootIdx + interval.note_distance
-        var newNoteValue = noteValue + interval.semitones
-
-        while(newNoteIdx >= notes.size) {
-            newNoteIdx -= notes.size
-        }
-
-        while (newNoteValue >= Interval.OCTAVE.semitones) {
-            newNoteValue -= Interval.OCTAVE.semitones
-        }
+        val newNoteIdx = (rootIdx + interval.note_distance) % notes.size
+        val newNoteValue = (noteValue + interval.semitones) % Interval.OCTAVE.semitones
 
         val newNote = notes[newNoteIdx]
         var accidental = ""
@@ -104,6 +96,7 @@ class IntervalHelper {
             1 -> "b"
             2 -> "bb"
             -11 -> "b" // Special case for Cb
+            11 -> "#" // Special case for B#
             -1 -> "#"
             -2 -> "##"
             else -> ""

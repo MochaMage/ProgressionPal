@@ -26,6 +26,14 @@ class ChordHelper {
                                            Interval.MINOR_THIRD,
                                            Interval.DIMINISHED_FIFTH,
                                            Interval.MINOR_SEVENTH)
+    private val dominantSeventhChord = setOf(Interval.UNISON,
+                                             Interval.MAJOR_THIRD,
+                                             Interval.PERFECT_FIFTH,
+                                             Interval.MINOR_SEVENTH)
+    private val majorSeventhChord = setOf(Interval.UNISON,
+                                          Interval.MAJOR_THIRD,
+                                          Interval.PERFECT_FIFTH,
+                                          Interval.MAJOR_SEVENTH)
     private val diminishedSeventhChord = setOf(Interval.UNISON,
                                                 Interval.MINOR_THIRD,
                                                 Interval.DIMINISHED_FIFTH,
@@ -138,6 +146,10 @@ class ChordHelper {
             return "${rootNote}sus2"
         } else if (intervals.containsAll(suspendedFourChord)){
             return "${rootNote}sus4"
+        } else if (intervals.containsAll(dominantSeventhChord)) {
+            return "${rootNote}7"
+        } else if(intervals.containsAll(majorSeventhChord)) {
+            return "${rootNote}M7"
         } else if (intervals.containsAll(majorChord)) {
             return rootNote
         } else if (intervals.containsAll(minorChord)) {

@@ -121,4 +121,30 @@ class UnitTests {
         result = chordHelper.identifyChord(mutableListOf("A", "D", "E"))
         assertEquals(result, "Asus4")
     }
+
+    @Test
+    fun testScaleHelper(){
+        var scale = Scale("C", Mode.AEOLIAN)
+        var result = scale.getScaleNotes()
+        assertEquals(listOf("C", "D", "Eb", "F", "G", "Ab", "Bb"), result)
+        scale = Scale("G", Mode.LYDIAN)
+        result = scale.getScaleNotes()
+        assertEquals(listOf("G", "A", "B", "C#", "D", "E", "F#"), result)
+        scale = Scale("G#", Mode.LYDIAN)
+        result = scale.getScaleNotes()
+        assertEquals(listOf("G#", "A#", "B#", "C##", "D#", "E#", "F##"), result)
+    }
+
+    @Test
+    fun testScaleGetChordAtDegree(){
+        var scale = Scale("C", Mode.AEOLIAN)
+        var result = scale.getChordAtDegree(2)
+        assertEquals("Eb", result)
+        result = scale.getChordAtDegree(0)
+        assertEquals("Cm", result)
+        result = scale.getChordAtDegree(1)
+        assertEquals("Ddim", result)
+        result = scale.getChordAtDegree(1, seventh = true)
+        assertEquals("Dm7b5", result)
+    }
 }
