@@ -163,4 +163,19 @@ class UnitTests {
         result = scale.getChordAtDegree(6, true)
         assertEquals("E#m7", result)
     }
+
+    @Test
+    fun testProgression(){
+        var progression = Progression("C", Mode.AEOLIAN)
+        progression.addChord("C")
+        progression.addChord("Am")
+        progression.addChord("F")
+        progression.addChord("G")
+        progression.addChord("Bb")
+        progression.addChord("Db")
+        progression.addChord("Bdim")
+
+
+                println(progression.getChordProgression())
+    }
 }
