@@ -50,7 +50,7 @@ class UnitTests {
         result = chordHelper.getNotesForChord("A+")
         assertEquals(result, mutableListOf("A", "C#", "E#"))
         result = chordHelper.getNotesForChord("Asus2")
-        assertEquals(result, mutableListOf("A", "B", "E"))
+        assertEquals(mutableListOf("A", "B", "E"), result)
         result = chordHelper.getNotesForChord("Asus4")
         assertEquals(result, mutableListOf("A", "D", "E"))
         result = chordHelper.getNotesForChord("Am")
@@ -76,6 +76,11 @@ class UnitTests {
         result = chordHelper.getNotesForChord("A7")
         assertEquals(result, mutableListOf("A", "C#", "E", "G"))
 
+        // Suspensions
+        result = chordHelper.getNotesForChord("A7sus4")
+        assertEquals(result, mutableListOf("A", "D", "E", "G"))
+        result = chordHelper.getNotesForChord("A7sus")
+        assertEquals(result, mutableListOf("A", "D", "E", "G"))
     }
 
     @Test

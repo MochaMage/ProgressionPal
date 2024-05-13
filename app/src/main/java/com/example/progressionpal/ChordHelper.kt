@@ -1,54 +1,13 @@
 package com.example.progressionpal
 
 class ChordHelper {
-    // Triads
-    private val majorChord = setOf(Interval.UNISON,
-                                    Interval.MAJOR_THIRD,
-                                    Interval.PERFECT_FIFTH)
-    private val minorChord = setOf(Interval.UNISON,
-                                    Interval.MINOR_THIRD,
-                                    Interval.PERFECT_FIFTH)
-    private val augmentedChord = setOf(Interval.UNISON,
-                                    Interval.MAJOR_THIRD,
-                                    Interval.AUGMENTED_FIFTH)
-    private val diminishedChord = setOf(Interval.UNISON,
-                                         Interval.MINOR_THIRD,
-                                         Interval.DIMINISHED_FIFTH)
-    private val suspendedFourChord = setOf(Interval.UNISON,
-                                           Interval.PERFECT_FOURTH,
-                                           Interval.PERFECT_FIFTH)
-    private val suspendedTwoChord = setOf(Interval.UNISON,
-                                          Interval.MAJOR_SECOND,
-                                          Interval.PERFECT_FIFTH)
-
-    // Tetrads
-    private val halfDiminishedChord = setOf(Interval.UNISON,
-                                           Interval.MINOR_THIRD,
-                                           Interval.DIMINISHED_FIFTH,
-                                           Interval.MINOR_SEVENTH)
-    private val dominantSeventhChord = setOf(Interval.UNISON,
-                                             Interval.MAJOR_THIRD,
-                                             Interval.PERFECT_FIFTH,
-                                             Interval.MINOR_SEVENTH)
-    private val majorSeventhChord = setOf(Interval.UNISON,
-                                          Interval.MAJOR_THIRD,
-                                          Interval.PERFECT_FIFTH,
-                                          Interval.MAJOR_SEVENTH)
-    private val minorSeventhChord = setOf(Interval.UNISON,
-                                          Interval.MINOR_THIRD,
-                                          Interval.PERFECT_FIFTH,
-                                          Interval.MINOR_SEVENTH)
-    private val diminishedSeventhChord = setOf(Interval.UNISON,
-                                                Interval.MINOR_THIRD,
-                                                Interval.DIMINISHED_FIFTH,
-                                                Interval.DIMINISHED_SEVENTH)
     private val majorSixthChord = setOf(Interval.UNISON,
                                         Interval.MAJOR_THIRD,
                                         Interval.PERFECT_FIFTH,
                                         Interval.MAJOR_SIXTH)
 
     fun getNotesForChord(chordName: String): MutableList<String> {
-        val chordRegex = "^([a-gA-G])([b#])?(m|\\+|dim7|m7b5|dim)?(M7|7|9|11|13)?(sus[2,4])?$"
+        val chordRegex = "^([a-gA-G])([b#])?(m|dim7|m7b5|dim|\\+)?(6|M7|7)?(sus[2,4]?)?$"
         val regex = Regex(chordRegex)
         val results = regex.find(chordName)
         val rootNoteGroup = results?.groups?.get(1)
@@ -62,26 +21,60 @@ class ChordHelper {
            rootNote += accidentalGroup.value
         }
 
-        var chordNotes: MutableList<String> = mutableListOf()
+        val chordNotes: MutableList<String> = mutableListOf(rootNote)
+        val intervalHelper = IntervalHelper()
 
-        if(qualityGroup == null) {
-           chordNotes = getNotesForChord(rootNote, majorChord)
-        } else if (qualityGroup.value == "m") {
-            chordNotes = getNotesForChord(rootNote, minorChord)
-        } else if (qualityGroup.value == "+") {
-            chordNotes = getNotesForChord(rootNote, augmentedChord)
-        } else if (qualityGroup.value == "dim"){
-            chordNotes = getNotesForChord(rootNote, diminishedChord)
-        } else if (qualityGroup.value == "m7b5") {
-            chordNotes = getNotesForChord(rootNote, halfDiminishedChord)
-        } else if (qualityGroup.value == "dim7"){
-            chordNotes = getNotesForChord(rootNote, diminishedSeventhChord)
-        } else if (suspendedGroup != null){
-            chordNotes = if(suspendedGroup.value == "sus4") {
-                getNotesForChord(rootNote, suspendedFourChord)
-            } else {
-                getNotesForChord(rootNote, suspendedTwoChord)
+        if (qualityGroup != null){
+            val quality = qualityGroup.value
+
+            //third
+            if (quality in setOf("m", "dim7", "dim", "m7b5")){
+                val minorThird = intervalHelper.getNoteAtInterval(rootNote, Interval.MINOR_THIRD)
+                chordNotes.add(minorThird)
+            }  else {
+                val majorThird = intervalHelper.getNoteAtInterval(rootNote, Interval.MAJOR_THIRD)
+                chordNotes.add(majorThird)
             }
+
+            //fifth
+            when (quality) {
+                in setOf("dim", "dim7", "m7b5") -> {
+                    val diminishedFifth = intervalHelper.getNoteAtInterval(rootNote, Interval.DIMINISHED_FIFTH)
+                    chordNotes.add(diminishedFifth)
+                }
+                "+" -> {
+                    val augmentedFifth = intervalHelper.getNoteAtInterval(rootNote, Interval.AUGMENTED_FIFTH)
+                    chordNotes.add(augmentedFifth)
+                }
+                else -> {
+                    val perfectFifth = intervalHelper.getNoteAtInterval(rootNote, Interval.PERFECT_FIFTH)
+                    chordNotes.add(perfectFifth)
+                }
+            }
+
+            // special case for m7b5
+            if (quality == "m7b5") {
+                val minorSeventh = intervalHelper.getNoteAtInterval(rootNote, Interval.MINOR_SEVENTH)
+                chordNotes.add(minorSeventh)
+            } else if (quality == "dim7"){
+                val dimSeventh = intervalHelper.getNoteAtInterval(rootNote, Interval.DIMINISHED_SEVENTH)
+                chordNotes.add(dimSeventh)
+            }
+        } else if (suspendedGroup != null) {
+            if (suspendedGroup.value == "sus2") {
+                val majorSecond = intervalHelper.getNoteAtInterval(rootNote, Interval.MAJOR_SECOND)
+                chordNotes.add(majorSecond)
+            } else {
+                val perfectFourth= intervalHelper.getNoteAtInterval(rootNote, Interval.PERFECT_FOURTH)
+                chordNotes.add(perfectFourth)
+            }
+            val perfectFifth = intervalHelper.getNoteAtInterval(rootNote, Interval.PERFECT_FIFTH)
+            chordNotes.add(perfectFifth)
+        } else {
+            val majorThird = intervalHelper.getNoteAtInterval(rootNote, Interval.MAJOR_THIRD)
+            chordNotes.add(majorThird)
+            val perfectFifth = intervalHelper.getNoteAtInterval(rootNote, Interval.PERFECT_FIFTH)
+            chordNotes.add(perfectFifth)
         }
 
         if(extensionGroup != null) {
@@ -92,23 +85,20 @@ class ChordHelper {
         return chordNotes
     }
 
-    private fun getNotesForChord(rootNote: String, chordType:Set<Interval>): MutableList<String> {
-        val chordNotes: MutableList<String> = mutableListOf()
-        val intervalHelper = IntervalHelper()
-        for(interval in chordType){
-            chordNotes.add(intervalHelper.getNoteAtInterval(rootNote, interval))
-        }
-        return chordNotes
-    }
-
     private fun getExtensionNotes(rootNote: String, extension: String): MutableList<String> {
         val extensionNotes: MutableList<String> = mutableListOf()
         val intervalHelper = IntervalHelper()
 
-        if (extension == "M7"){
-            extensionNotes.add(intervalHelper.getNoteAtInterval(rootNote, Interval.MAJOR_SEVENTH))
-        } else if (extension == "7") {
-            extensionNotes.add(intervalHelper.getNoteAtInterval(rootNote, Interval.MINOR_SEVENTH))
+        when (extension) {
+            "M7" -> {
+                extensionNotes.add(intervalHelper.getNoteAtInterval(rootNote, Interval.MAJOR_SEVENTH))
+            }
+            "7" -> {
+                extensionNotes.add(intervalHelper.getNoteAtInterval(rootNote, Interval.MINOR_SEVENTH))
+            }
+            "6" -> {
+                extensionNotes.add(intervalHelper.getNoteAtInterval(rootNote, Interval.MAJOR_SIXTH))
+            }
         }
 
         return extensionNotes
