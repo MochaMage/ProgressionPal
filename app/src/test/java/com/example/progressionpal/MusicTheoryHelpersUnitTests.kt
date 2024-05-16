@@ -81,6 +81,10 @@ class UnitTests {
         assertEquals(result, mutableListOf("A", "D", "E", "G"))
         result = chordHelper.getNotesForChord("A7sus")
         assertEquals(result, mutableListOf("A", "D", "E", "G"))
+
+        // Inversions
+        result = chordHelper.getNotesForChord("A/C#")
+        assertEquals(result, mutableListOf("C#", "A", "E"))
     }
 
     @Test
@@ -103,6 +107,8 @@ class UnitTests {
         val chordHelper = ChordHelper()
         var result = chordHelper.identifyChord(mutableListOf("C", "A", "E"))
         assertEquals(result, "Am")
+        result = chordHelper.identifyChord(mutableListOf("C", "A", "E"), true)
+        assertEquals(result, "Am/C")
         result = chordHelper.identifyChord(mutableListOf("C", "E", "A"))
         assertEquals(result, "Am")
         result = chordHelper.identifyChord(mutableListOf("A", "E", "C"))
@@ -113,6 +119,8 @@ class UnitTests {
         assertEquals(result, "C")
         result = chordHelper.identifyChord(mutableListOf("G", "C", "E", "A"))
         assertEquals(result, "C6")
+        result = chordHelper.identifyChord(mutableListOf("G", "C", "E", "A"), true)
+        assertEquals(result, "C6/G")
         result = chordHelper.identifyChord(mutableListOf("A", "C", "Eb"))
         assertEquals("Adim", result)
         result = chordHelper.identifyChord(mutableListOf("C", "A", "Eb"))
@@ -174,8 +182,17 @@ class UnitTests {
         progression.addChord("Bb")
         progression.addChord("Db")
         progression.addChord("Bdim")
+        progression.addChord("G7")
+        println(progression.chordProgression)
+        println(progression.degreeProgression)
+        println(progression.findSubstitutions())
+    }
 
-
-                println(progression.getChordProgression())
+    @Test
+    fun testChord(){
+        var chord = Chord(name = "Am")
+        println(chord.notes)
+        chord = Chord(notes = mutableListOf("A", "C", "E"))
+        println(chord.name)
     }
 }

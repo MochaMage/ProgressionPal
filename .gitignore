@@ -16,6 +16,12 @@ local.properties
 # Gradle files
 .gradle/
 build/
+settings.gradle.kts
+build.gradle.kts
+gradle.properties
+gradle-wrapper.properties
+libs.versions.toml
+local.properties
 
 # Local configuration file (sdk path, etc)
 local.properties

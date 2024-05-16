@@ -7,7 +7,7 @@ class ChordHelper {
                                         Interval.MAJOR_SIXTH)
 
     fun getNotesForChord(chordName: String): MutableList<String> {
-        val chordRegex = "^([a-gA-G])([b#])?(m|dim7|m7b5|dim|\\+)?(6|M7|7)?(sus[2,4]?)?$"
+        val chordRegex = "^([a-gA-G])([b#])?(m|dim7|m7b5|dim|\\+)?(6|M7|7)?(sus[2,4]?)?/?([a-gA-G][b#]?)?$"
         val regex = Regex(chordRegex)
         val results = regex.find(chordName)
         val rootNoteGroup = results?.groups?.get(1)
@@ -15,6 +15,7 @@ class ChordHelper {
         val qualityGroup = results?.groups?.get(3)
         val extensionGroup = results?.groups?.get(4)
         val suspendedGroup = results?.groups?.get(5)
+        val slashGroup = results?.groups?.get(6)
 
         var rootNote = rootNoteGroup!!.value
         if(accidentalGroup != null){
@@ -82,6 +83,18 @@ class ChordHelper {
             chordNotes.addAll(extensions)
         }
 
+        if (slashGroup != null) {
+            val bass = slashGroup.value
+            val bassIdx = chordNotes.indexOf(bass)
+
+            if (bassIdx == -1){
+                throw Exception("GTFO jazz dork")
+            }
+
+            val removedNote = chordNotes.removeAt(bassIdx)
+            chordNotes.add(0, removedNote)
+        }
+
         return chordNotes
     }
 
@@ -113,7 +126,7 @@ class ChordHelper {
         return notes
     }
 
-    fun identifyChord(notes: MutableList<String>): String {
+    fun identifyChord(notes: MutableList<String>, slashNotation: Boolean = false): String {
         val firstNote = notes[0]
         val otherNotes = notes.slice(1..<notes.size)
         val intervals: MutableList<Interval> = mutableListOf(Interval.UNISON)
@@ -121,6 +134,12 @@ class ChordHelper {
         for (note in otherNotes) {
             val interval = intervalHelper.getIntervalDistance(firstNote, note)
             intervals.add(interval)
+        }
+
+        var slashNote = ""
+
+        if (slashNotation) {
+            slashNote = "/${firstNote}"
         }
 
         //Special case: Sixth chords
@@ -133,11 +152,11 @@ class ChordHelper {
         // Same goes for a chord containing both a third and a fourth. Invert it until we get the
         // expected sus chord.
         if (intervals.contains(Interval.MINOR_SIXTH)) {
-            return identifyChord(reorderNotes(notes, intervals, Interval.MINOR_SIXTH))
+            return "${identifyChord(reorderNotes(notes, intervals, Interval.MINOR_SIXTH))}${slashNote}"
         } else if (intervals.contains(Interval.MAJOR_SIXTH)) {
-            return identifyChord(reorderNotes(notes, intervals, Interval.MAJOR_SIXTH))
+            return "${identifyChord(reorderNotes(notes, intervals, Interval.MAJOR_SIXTH))}${slashNote}"
         } else if (intervals.contains(Interval.PERFECT_FOURTH) && (intervals.contains(Interval.MINOR_THIRD) || intervals.contains(Interval.MAJOR_THIRD))){
-            return identifyChord(reorderNotes(notes, intervals, Interval.PERFECT_FOURTH))
+            return "${identifyChord(reorderNotes(notes, intervals, Interval.PERFECT_FOURTH))}${slashNote}"
         }
         val rootNote = notes[0]
         var seventhType = ""
