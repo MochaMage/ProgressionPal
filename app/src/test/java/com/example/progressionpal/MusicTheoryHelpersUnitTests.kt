@@ -174,15 +174,11 @@ class UnitTests {
 
     @Test
     fun testProgression(){
-        var progression = Progression("C", Mode.AEOLIAN)
-        progression.addChord("C")
+        var progression = Progression("A", Mode.AEOLIAN)
         progression.addChord("Am")
-        progression.addChord("F")
-        progression.addChord("G")
-        progression.addChord("Bb")
-        progression.addChord("Db")
-        progression.addChord("Bdim")
-        progression.addChord("G7")
+        progression.addChord("Dm")
+        progression.addChord("E7")
+        progression.addChord("Am")
         println(progression.chordProgression)
         println(progression.degreeProgression)
         println(progression.findSubstitutions())

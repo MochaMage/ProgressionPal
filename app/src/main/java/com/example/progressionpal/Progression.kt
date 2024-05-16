@@ -14,6 +14,9 @@ class Progression(private val key: String, private val mode: Mode) {
     var degreeProgression: MutableList<String> = mutableListOf()
     var substitutions: MutableList<MutableList<Pair<String, String>>> = mutableListOf()
 
+    private val chordHelper = ChordHelper()
+    private val intervalHelper = IntervalHelper()
+
     fun addChord(chord: String): String {
         // Detect the function of the chord being added
         val chordRoot = chord[0]
@@ -49,6 +52,15 @@ class Progression(private val key: String, private val mode: Mode) {
                 substitutions[i].add(Pair("V7toiidim7","${scale.getScaleNotes()[1]}dim7"))
             }
 
+            // Neapolitan 6th
+            if (mode == Mode.AEOLIAN && degreeProgression[i] == "IVm" && degreeProgression[i + 1].startsWith("V")){
+                val fourthChordNotes =  chordHelper.getNotesForChord(chordProgression[i])
+                val fifth = fourthChordNotes.removeLast()
+                val fifthReplacement = intervalHelper.getNoteAtInterval(fifth, Interval.MINOR_SECOND)
+                fourthChordNotes.add(fifthReplacement)
+                val chordName = chordHelper.identifyChord(fourthChordNotes, slashNotation = true)
+                substitutions[i].add(Pair("neapolitan6", chordName))
+            }
         }
 
         return substitutions
