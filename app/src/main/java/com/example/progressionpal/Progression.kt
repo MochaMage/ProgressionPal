@@ -61,8 +61,26 @@ class Progression(private val key: String, private val mode: Mode) {
                 val chordName = chordHelper.identifyChord(fourthChordNotes, slashNotation = true)
                 substitutions[i].add(Pair("neapolitan6", chordName))
             }
+
+            // French augmented 6th
+            if (degreeProgression[i] == "IVm"){
+
+
+            }
+
+            // Tritone substitution
+            if (degreeProgression[i] == "V7") {
+                val fifthChordRoot = chordHelper.getNotesForChord(chordProgression[i])[0]
+                val tritoneRoot = intervalHelper.getNoteAtInterval(fifthChordRoot, Interval.DIMINISHED_FIFTH)
+                substitutions[i].add(Pair("tritoneSubstitution","${tritoneRoot}7"))
+            }
         }
 
         return substitutions
+    }
+
+    fun suggestPassingChords() {
+        // Secondary dominants
+        // Treat each chord as having its own scale
     }
 }
