@@ -69,6 +69,8 @@ class UnitTests {
         assertEquals(result, mutableListOf("A", "C", "Eb"))
         result = chordHelper.getNotesForChord("Am7b5")
         assertEquals(result, mutableListOf("A", "C", "Eb", "G"))
+        result = chordHelper.getNotesForChord("A7b5")
+        assertEquals(result, mutableListOf("A", "C#", "Eb", "G"))
         result = chordHelper.getNotesForChord("Adim7")
         assertEquals(result, mutableListOf("A", "C", "Eb", "Gb"))
         result = chordHelper.getNotesForChord("AM7")
@@ -146,13 +148,13 @@ class UnitTests {
     @Test
     fun testScaleHelper(){
         var scale = Scale("C", Mode.AEOLIAN)
-        var result = scale.getScaleNotes()
+        var result = scale.scaleNotes
         assertEquals(listOf("C", "D", "Eb", "F", "G", "Ab", "Bb"), result)
         scale = Scale("G", Mode.LYDIAN)
-        result = scale.getScaleNotes()
+        result = scale.scaleNotes
         assertEquals(listOf("G", "A", "B", "C#", "D", "E", "F#"), result)
         scale = Scale("G#", Mode.LYDIAN)
-        result = scale.getScaleNotes()
+        result = scale.scaleNotes
         assertEquals(listOf("G#", "A#", "B#", "C##", "D#", "E#", "F##"), result)
     }
 
@@ -181,7 +183,7 @@ class UnitTests {
         progression.addChord("Am")
         println(progression.chordProgression)
         println(progression.degreeProgression)
-        println(progression.findSubstitutions())
+        println(progression.findSubstitutionsAndPassingChords())
     }
 
     @Test

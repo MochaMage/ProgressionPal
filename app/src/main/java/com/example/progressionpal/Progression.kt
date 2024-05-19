@@ -13,6 +13,7 @@ class Progression(private val key: String, private val mode: Mode) {
     var chordProgression: MutableList<String> = mutableListOf()
     var degreeProgression: MutableList<String> = mutableListOf()
     var substitutions: MutableList<MutableList<Pair<String, String>>> = mutableListOf()
+    var passingChords: MutableList<MutableList<Pair<String, String>>> = mutableListOf()
 
     private val chordHelper = ChordHelper()
     private val intervalHelper = IntervalHelper()
@@ -20,7 +21,7 @@ class Progression(private val key: String, private val mode: Mode) {
     fun addChord(chord: String): String {
         // Detect the function of the chord being added
         val chordRoot = chord[0]
-        val scaleNotes = scale.getScaleNotes()
+        val scaleNotes = scale.scaleNotes
         var degree: Int = 0
 
         for (i in scaleNotes.indices){
@@ -37,50 +38,59 @@ class Progression(private val key: String, private val mode: Mode) {
         return verboseFunction
     }
 
-    fun findSubstitutions(): MutableList<MutableList<kotlin.Pair<String, String>>> {
+    fun findSubstitutionsAndPassingChords(): MutableList<MutableList<Pair<String, String>>> {
         val substitutionHelper = SubstitutionHelper(key)
         for (i in chordProgression.indices) {
-            // Negative harmony
-            val negativeEquivalent = substitutionHelper.getNegativeHarmonyChord(chordProgression[i])
             if (substitutions.size - 1 < i) {
                 substitutions.add(mutableListOf())
             }
+            if (passingChords.size - 1 < i) {
+                passingChords.add(mutableListOf())
+            }
+            // Negative harmony
+            val negativeEquivalent = substitutionHelper.getNegativeHarmonyChord(chordProgression[i])
             substitutions[i].add(Pair("negativeHarmony", negativeEquivalent))
 
-            // V7 to iiDim
+            // V7 to iiDim and tritone substitution
             if (degreeProgression[i] == "V7") {
-                substitutions[i].add(Pair("V7toiidim7","${scale.getScaleNotes()[1]}dim7"))
+                substitutions[i].add(Pair("V7toiidim7", "${scale.scaleNotes[1]}dim7"))
+
+                // Tritone substitution
+                val fifthChordRoot = chordHelper.getNotesForChord(chordProgression[i])[0]
+                val tritoneRoot =
+                    intervalHelper.getNoteAtInterval(fifthChordRoot, Interval.DIMINISHED_FIFTH)
+                substitutions[i].add(Pair("tritoneSubstitution", "${tritoneRoot}7"))
             }
 
             // Neapolitan 6th
-            if (mode == Mode.AEOLIAN && degreeProgression[i] == "IVm" && degreeProgression[i + 1].startsWith("V")){
-                val fourthChordNotes =  chordHelper.getNotesForChord(chordProgression[i])
+            if (mode == Mode.AEOLIAN &&
+                degreeProgression[i] == "IVm" && degreeProgression[i + 1].startsWith("V")) {
+                val fourthChordNotes = chordHelper.getNotesForChord(chordProgression[i])
                 val fifth = fourthChordNotes.removeLast()
-                val fifthReplacement = intervalHelper.getNoteAtInterval(fifth, Interval.MINOR_SECOND)
+                val fifthReplacement =
+                    intervalHelper.getNoteAtInterval(fifth, Interval.MINOR_SECOND)
                 fourthChordNotes.add(fifthReplacement)
                 val chordName = chordHelper.identifyChord(fourthChordNotes, slashNotation = true)
                 substitutions[i].add(Pair("neapolitan6", chordName))
             }
 
             // French augmented 6th
-            if (degreeProgression[i] == "IVm"){
-
-
+            if (degreeProgression[i] == "IVm") {
+                val rootNote =
+                    intervalHelper.getNoteAtInterval(scale.scaleNotes[0], Interval.MINOR_SIXTH)
+                substitutions[i].add(Pair("french6", "${rootNote}7b5"))
             }
 
-            // Tritone substitution
-            if (degreeProgression[i] == "V7") {
-                val fifthChordRoot = chordHelper.getNotesForChord(chordProgression[i])[0]
-                val tritoneRoot = intervalHelper.getNoteAtInterval(fifthChordRoot, Interval.DIMINISHED_FIFTH)
-                substitutions[i].add(Pair("tritoneSubstitution","${tritoneRoot}7"))
+            // Cadential 6-4
+            if (degreeProgression[i].startsWith("V")) {
+                val chordName = scale.getChordAtDegree(0)
+                var chordNotes = chordHelper.getNotesForChord(chordName)
+                val fifth = chordNotes.removeLast()
+                chordNotes.add(0, fifth)
+                val newChordName = chordHelper.identifyChord(chordNotes, slashNotation = true)
+                passingChords[i].add(Pair("cadential64", newChordName))
             }
         }
-
         return substitutions
-    }
-
-    fun suggestPassingChords() {
-        // Secondary dominants
-        // Treat each chord as having its own scale
     }
 }

@@ -7,7 +7,7 @@ class ChordHelper {
                                         Interval.MAJOR_SIXTH)
 
     fun getNotesForChord(chordName: String): MutableList<String> {
-        val chordRegex = "^([a-gA-G])([b#])?(m|dim7|m7b5|dim|\\+)?(6|M7|7)?(sus[2,4]?)?/?([a-gA-G][b#]?)?$"
+        val chordRegex = "^([a-gA-G])([b#])?(m|dim7|m7b5|7b5|dim|\\+)?(6|M7|7)?(sus[2,4]?)?/?([a-gA-G][b#]?)?$"
         val regex = Regex(chordRegex)
         val results = regex.find(chordName)
         val rootNoteGroup = results?.groups?.get(1)
@@ -39,7 +39,7 @@ class ChordHelper {
 
             //fifth
             when (quality) {
-                in setOf("dim", "dim7", "m7b5") -> {
+                in setOf("dim", "dim7", "m7b5", "7b5") -> {
                     val diminishedFifth = intervalHelper.getNoteAtInterval(rootNote, Interval.DIMINISHED_FIFTH)
                     chordNotes.add(diminishedFifth)
                 }
@@ -54,7 +54,7 @@ class ChordHelper {
             }
 
             // special case for m7b5
-            if (quality == "m7b5") {
+            if (quality in setOf("m7b5", "7b5")) {
                 val minorSeventh = intervalHelper.getNoteAtInterval(rootNote, Interval.MINOR_SEVENTH)
                 chordNotes.add(minorSeventh)
             } else if (quality == "dim7"){

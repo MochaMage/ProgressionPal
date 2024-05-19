@@ -2,6 +2,8 @@ package com.example.progressionpal
 
 enum class Interval(val semitones: Int, val note_distance: Int) {
     UNISON(0, 0),
+    FLAT(-1, 0),
+    SHARP(1, 0),
     MINOR_SECOND(1, 1),
     MAJOR_SECOND(2, 1),
     MINOR_THIRD(3,2),

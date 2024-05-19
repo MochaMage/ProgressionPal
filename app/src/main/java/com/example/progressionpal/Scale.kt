@@ -1,6 +1,6 @@
 package com.example.progressionpal
 
-class Scale(private var root: String, private var mode: Mode) {
+class Scale(private var root: String, private var mode: Mode = Mode.IONIAN) {
     private val majorScaleSteps: List<Step> = listOf(Step.WHOLE,
                                                      Step.WHOLE,
                                                      Step.HALF,
@@ -9,9 +9,12 @@ class Scale(private var root: String, private var mode: Mode) {
                                                      Step.WHOLE,
                                                      Step.HALF)
 
-    private var scaleNotes: MutableList<String> = mutableListOf()
+    var scaleNotes: MutableList<String> = mutableListOf()
     private val intervalHelper = IntervalHelper()
     init {
+        if (root.contains('m')) {
+            mode = Mode.AEOLIAN
+        }
         generateScaleNotes()
     }
 
@@ -27,10 +30,6 @@ class Scale(private var root: String, private var mode: Mode) {
             }
             scaleNotes.add(newNote)
         }
-    }
-
-    fun getScaleNotes(): MutableList<String> {
-        return scaleNotes
     }
 
     fun getChordAtDegree(degree: Int, seventh: Boolean = false): String {
