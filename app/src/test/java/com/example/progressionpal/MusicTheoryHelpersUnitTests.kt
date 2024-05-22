@@ -192,5 +192,12 @@ class UnitTests {
         println(chord.notes)
         chord = Chord(notes = mutableListOf("A", "C", "E"))
         println(chord.name)
+        println(chord.intervals)
+        chord = Chord(notes = mutableListOf("E", "C", "A", "G"))
+        println(chord.name)
+        println(chord.intervals)
+        chord = Chord(notes = mutableListOf("Eb", "C", "A", "G"))
+        println(chord.name)
+        println(chord.intervals)
     }
 }
