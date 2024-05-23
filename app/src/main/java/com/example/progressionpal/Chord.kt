@@ -1,17 +1,17 @@
 package com.example.progressionpal
 
-data class Chord(var name: String = "", var notes: MutableList<String> = mutableListOf()){
-    private val majorSixthChord = setOf(Interval.UNISON,
-        Interval.MAJOR_THIRD,
-        Interval.PERFECT_FIFTH,
-        Interval.MAJOR_SIXTH)
-
-    val intervals: MutableList<Interval> = mutableListOf()
-    var harmonicFunction = ""
+data class Chord(var name: String = "",
+                 var notes: MutableList<String> = mutableListOf(),
+                 val intervals: MutableList<Interval> = mutableListOf(),
+                 var quality: ChordQuality = ChordQuality.MAJOR,
+                 var bass: String = "",
+                 var extension: String = "",
+                 var harmonicFunction: String = ""
+                 ){
 
     init {
         if (name.isEmpty()){
-            name = identifyChord(notes)
+            name = identifyChord(notes.toMutableList(), true)
         } else if (notes.isEmpty()){
             notes = getNotesForChord(name)
         } else {
@@ -25,15 +25,8 @@ data class Chord(var name: String = "", var notes: MutableList<String> = mutable
         }
     }
 
-    fun setFunction(degree: Int) {
+    fun setHarmonicFunction(degree: Int) {
 
-    }
-
-    fun isMinorChord(): Boolean {
-        if (intervals.contains(Interval.MINOR_THIRD)){
-            return true
-        }
-        return false
     }
 
     fun isSuspendedChord(): Boolean {
@@ -41,9 +34,9 @@ data class Chord(var name: String = "", var notes: MutableList<String> = mutable
     }
 
     fun isSeventhChord(): Boolean {
-        return notes.size > 3
+        return intervals.intersect(setOf(Interval.DIMINISHED_SEVENTH, Interval.MAJOR_SEVENTH, Interval.MINOR_SEVENTH)).isNotEmpty()
     }
-    fun getNotesForChord(chordName: String): MutableList<String> {
+    private fun getNotesForChord(chordName: String): MutableList<String> {
         val chordRegex = "^([a-gA-G])([b#])?(m|dim7|m7b5|7b5|dim|\\+)?(6|M7|7)?(sus[2,4]?)?/?([a-gA-G][b#]?)?$"
         val regex = Regex(chordRegex)
         val results = regex.find(chordName)
@@ -55,6 +48,7 @@ data class Chord(var name: String = "", var notes: MutableList<String> = mutable
         val slashGroup = results?.groups?.get(6)
 
         var rootNote = rootNoteGroup!!.value
+        this.bass = rootNote
         if(accidentalGroup != null){
             rootNote += accidentalGroup.value
         }
@@ -69,6 +63,7 @@ data class Chord(var name: String = "", var notes: MutableList<String> = mutable
             if (quality in setOf("m", "dim7", "dim", "m7b5")){
                 val minorThird = intervalHelper.getNoteAtInterval(rootNote, Interval.MINOR_THIRD)
                 chordNotes.add(minorThird)
+                this.quality = ChordQuality.MINOR
             }  else {
                 val majorThird = intervalHelper.getNoteAtInterval(rootNote, Interval.MAJOR_THIRD)
                 chordNotes.add(majorThird)
@@ -79,10 +74,12 @@ data class Chord(var name: String = "", var notes: MutableList<String> = mutable
                 in setOf("dim", "dim7", "m7b5", "7b5") -> {
                     val diminishedFifth = intervalHelper.getNoteAtInterval(rootNote, Interval.DIMINISHED_FIFTH)
                     chordNotes.add(diminishedFifth)
+                    this.quality = ChordQuality.DIMINISHED
                 }
                 "+" -> {
                     val augmentedFifth = intervalHelper.getNoteAtInterval(rootNote, Interval.AUGMENTED_FIFTH)
                     chordNotes.add(augmentedFifth)
+                    this.quality = ChordQuality.AUGMENTED
                 }
                 else -> {
                     val perfectFifth = intervalHelper.getNoteAtInterval(rootNote, Interval.PERFECT_FIFTH)
@@ -108,6 +105,7 @@ data class Chord(var name: String = "", var notes: MutableList<String> = mutable
             }
             val perfectFifth = intervalHelper.getNoteAtInterval(rootNote, Interval.PERFECT_FIFTH)
             chordNotes.add(perfectFifth)
+            this.quality = ChordQuality.SUSPENDED
         } else {
             val majorThird = intervalHelper.getNoteAtInterval(rootNote, Interval.MAJOR_THIRD)
             chordNotes.add(majorThird)
@@ -130,6 +128,7 @@ data class Chord(var name: String = "", var notes: MutableList<String> = mutable
 
             val removedNote = chordNotes.removeAt(bassIdx)
             chordNotes.add(0, removedNote)
+            this.bass = removedNote
         }
 
         return chordNotes
@@ -163,7 +162,7 @@ data class Chord(var name: String = "", var notes: MutableList<String> = mutable
         return notes
     }
 
-    fun identifyChord(notes: MutableList<String>, slashNotation: Boolean = false): String {
+    private fun identifyChord(notes: MutableList<String>, slashNotation: Boolean = false): String {
         val firstNote = notes[0]
         val otherNotes = notes.slice(1..<notes.size)
         val intervals: MutableList<Interval> = mutableListOf(Interval.UNISON)
@@ -177,6 +176,7 @@ data class Chord(var name: String = "", var notes: MutableList<String> = mutable
 
         if (slashNotation) {
             slashNote = "/${firstNote}"
+            this.bass = firstNote
         }
 
         //Special case: Sixth chords
@@ -214,7 +214,6 @@ data class Chord(var name: String = "", var notes: MutableList<String> = mutable
             qualityType = "+"
         } else if (intervals.contains(Interval.DIMINISHED_FIFTH)) {
             if (intervals.contains(Interval.MINOR_SEVENTH)) {
-
                 seventhType = "m7b5"
             } else if (intervals.contains(Interval.DIMINISHED_SEVENTH)) {
                 seventhType = "dim7"
@@ -224,10 +223,13 @@ data class Chord(var name: String = "", var notes: MutableList<String> = mutable
         } else {
             if (intervals.contains(Interval.MINOR_THIRD)) {
                 qualityType = "m"
+                this.quality = ChordQuality.MINOR
             } else if (intervals.contains(Interval.MAJOR_SECOND)) {
                 suspensionType = "sus2"
+                this.quality = ChordQuality.SUSPENDED
             } else if (intervals.contains(Interval.PERFECT_FOURTH)) {
                 suspensionType = "sus4"
+                this.quality = ChordQuality.SUSPENDED
             }
         }
 

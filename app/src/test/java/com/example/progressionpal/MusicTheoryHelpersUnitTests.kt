@@ -189,15 +189,31 @@ class UnitTests {
     @Test
     fun testChord(){
         var chord = Chord(name = "Am")
-        println(chord.notes)
-        chord = Chord(notes = mutableListOf("A", "C", "E"))
-        println(chord.name)
-        println(chord.intervals)
-        chord = Chord(notes = mutableListOf("E", "C", "A", "G"))
-        println(chord.name)
-        println(chord.intervals)
-        chord = Chord(notes = mutableListOf("Eb", "C", "A", "G"))
-        println(chord.name)
-        println(chord.intervals)
+        assertEquals(ChordQuality.MINOR, chord.quality)
+        assertEquals("A", chord.bass)
+        assertEquals(mutableListOf("A", "C", "E"), chord.notes)
+
+        chord = Chord(name = "Am/C")
+        assertEquals(ChordQuality.MINOR, chord.quality)
+        assertEquals("C", chord.bass)
+        assertEquals("C", chord.notes.first())
+
+        chord = Chord(notes = mutableListOf("C", "A", "E"))
+        assertEquals("Am/C", chord.name)
+        assertEquals(ChordQuality.MINOR, chord.quality)
+        assertEquals("C", chord.bass)
+        assertEquals("C", chord.notes.first())
+
+        chord = Chord(notes = mutableListOf("B", "A", "E"))
+        assertEquals("B7sus4", chord.name)
+        assertEquals(ChordQuality.SUSPENDED, chord.quality)
+        assertEquals("B", chord.bass)
+        assertEquals("B", chord.notes.first())
+
+        chord = Chord(notes = mutableListOf("A", "C", "E", "F#"))
+        assertEquals("Am6", chord.name)
+        assertEquals(ChordQuality.MINOR, chord.quality)
+        assertEquals("A", chord.bass)
+        assertEquals("A", chord.notes.first())
     }
 }
