@@ -179,18 +179,12 @@ data class Chord(var name: String = "",
             this.bass = firstNote
         }
 
-        //Special case: Sixth chords
-        if (intervals.contains(Interval.PERFECT_FIFTH) && intervals.contains(Interval.MAJOR_SIXTH)) {
-            notes.removeAt(intervals.indexOf(Interval.MAJOR_SIXTH))
-            return "${identifyChord(notes)}6${slashNote}"
-        }
-
-        // If sixths are found and were not handled by the special case above,
+        // If sixths are found and the chord doesn't also contain a perfect fifth
         // we invert them until we get the root in the first position
         // Same goes for a chord containing both a third and a fourth. Invert it until we get the
         // expected sus chord.
         val sixthNote = intervals.intersect(setOf(Interval.MINOR_SIXTH, Interval.MAJOR_SIXTH))
-        if (sixthNote.isNotEmpty()) {
+        if (sixthNote.isNotEmpty() && !intervals.contains(Interval.PERFECT_FIFTH)) {
             return "${identifyChord(reorderNotes(notes, intervals, sixthNote.first()))}${slashNote}"
         }
 
@@ -198,25 +192,26 @@ data class Chord(var name: String = "",
             return "${identifyChord(reorderNotes(notes, intervals, Interval.PERFECT_FOURTH))}${slashNote}"
         }
 
-
         val rootNote = notes[0]
-        var seventhType = ""
+        var extension = ""
         var suspensionType = ""
         var qualityType = ""
 
         if (intervals.contains(Interval.MINOR_SEVENTH)) {
-            seventhType = "7"
+            extension = "7"
         } else if (intervals.contains(Interval.MAJOR_SEVENTH)) {
-            seventhType = "M7"
+            extension = "M7"
+        } else if (intervals.contains(Interval.MAJOR_SIXTH)) {
+            extension = "6"
         }
 
         if (intervals.contains(Interval.AUGMENTED_FIFTH)) {
             qualityType = "+"
         } else if (intervals.contains(Interval.DIMINISHED_FIFTH)) {
             if (intervals.contains(Interval.MINOR_SEVENTH)) {
-                seventhType = "m7b5"
+                extension = "m7b5"
             } else if (intervals.contains(Interval.DIMINISHED_SEVENTH)) {
-                seventhType = "dim7"
+                extension = "dim7"
             } else {
                 qualityType = "dim"
             }
@@ -233,6 +228,6 @@ data class Chord(var name: String = "",
             }
         }
 
-        return "${rootNote}${qualityType}${seventhType}${suspensionType}"
+        return "${rootNote}${qualityType}${extension}${suspensionType}"
     }
 }

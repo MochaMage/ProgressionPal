@@ -204,6 +204,12 @@ class UnitTests {
         assertEquals("C", chord.bass)
         assertEquals("C", chord.notes.first())
 
+        chord = Chord(notes = mutableListOf("E", "A", "C"))
+        assertEquals("Am/E", chord.name)
+        assertEquals(ChordQuality.MINOR, chord.quality)
+        assertEquals("E", chord.bass)
+        assertEquals("E", chord.notes.first())
+
         chord = Chord(notes = mutableListOf("B", "A", "E"))
         assertEquals("B7sus4", chord.name)
         assertEquals(ChordQuality.SUSPENDED, chord.quality)
@@ -213,6 +219,18 @@ class UnitTests {
         chord = Chord(notes = mutableListOf("A", "C", "E", "F#"))
         assertEquals("Am6", chord.name)
         assertEquals(ChordQuality.MINOR, chord.quality)
+        assertEquals("A", chord.bass)
+        assertEquals("A", chord.notes.first())
+
+        chord = Chord(notes = mutableListOf("C", "A", "E", "F#"))
+        assertEquals("Am6/C", chord.name)
+        assertEquals(ChordQuality.MINOR, chord.quality)
+        assertEquals("C", chord.bass)
+        assertEquals("C", chord.notes.first())
+
+        chord = Chord(notes = mutableListOf("A", "D", "E", "F#"))
+        assertEquals("A6sus4", chord.name)
+        assertEquals(ChordQuality.SUSPENDED, chord.quality)
         assertEquals("A", chord.bass)
         assertEquals("A", chord.notes.first())
     }
