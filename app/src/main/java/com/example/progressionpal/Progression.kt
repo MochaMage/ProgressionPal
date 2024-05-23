@@ -14,7 +14,6 @@ class Progression(private val key: String, private val mode: Mode) {
     var degreeProgression: MutableList<String> = mutableListOf()
 
 
-    private val chordHelper = ChordHelper()
     private val intervalHelper = IntervalHelper()
 
     fun addChord(chord: String): String {
@@ -37,9 +36,9 @@ class Progression(private val key: String, private val mode: Mode) {
         return verboseFunction
     }
 
-    fun findSubstitutionsAndPassingChords(): MutableMap<String, MutableList<MutableList<Pair<String, String>>>> {
-        val substitutions: MutableList<MutableList<Pair<String, String>>> = mutableListOf()
-        val passingChords: MutableList<MutableList<Pair<String, String>>> = mutableListOf()
+    fun findSubstitutionsAndPassingChords(): MutableMap<String, MutableList<MutableList<Pair<String, Chord>>>> {
+        val substitutions: MutableList<MutableList<Pair<String, Chord>>> = mutableListOf()
+        val passingChords: MutableList<MutableList<Pair<String, Chord>>> = mutableListOf()
         val substitutionHelper = SubstitutionHelper(key)
         for (i in chordProgression.indices) {
             if (substitutions.size - 1 < i) {
@@ -55,24 +54,24 @@ class Progression(private val key: String, private val mode: Mode) {
 
             // V7 to iiDim and tritone substitution
             if (degreeProgression[i] == "V7") {
-                substitutions[i].add(Pair("V7toiidim7", "${scale.scaleNotes[1]}dim7"))
+                substitutions[i].add(Pair("V7toiidim7", Chord("${scale.scaleNotes[1]}dim7")))
 
                 // Tritone substitution
-                val fifthChordRoot = chordHelper.getNotesForChord(chordProgression[i])[0]
+                val fifthChordRoot = Chord(chordProgression[i]).notes[0]
                 val tritoneRoot =
                     intervalHelper.getNoteAtInterval(fifthChordRoot, Interval.DIMINISHED_FIFTH)
-                substitutions[i].add(Pair("tritoneSubstitution", "${tritoneRoot}7"))
+                substitutions[i].add(Pair("tritoneSubstitution", Chord("${tritoneRoot}7")))
             }
 
             // Neapolitan 6th
             if (mode == Mode.AEOLIAN &&
                 degreeProgression[i] == "IVm" && degreeProgression[i + 1].startsWith("V")) {
-                val fourthChordNotes = chordHelper.getNotesForChord(chordProgression[i])
+                val fourthChordNotes = Chord(chordProgression[i]).notes
                 val fifth = fourthChordNotes.removeLast()
                 val fifthReplacement =
                     intervalHelper.getNoteAtInterval(fifth, Interval.MINOR_SECOND)
                 fourthChordNotes.add(fifthReplacement)
-                val chordName = chordHelper.identifyChord(fourthChordNotes, slashNotation = true)
+                val chordName = Chord(notes=fourthChordNotes)
                 substitutions[i].add(Pair("neapolitan6", chordName))
             }
 
@@ -80,17 +79,17 @@ class Progression(private val key: String, private val mode: Mode) {
             if (degreeProgression[i] == "IVm") {
                 val rootNote =
                     intervalHelper.getNoteAtInterval(scale.scaleNotes[0], Interval.MINOR_SIXTH)
-                substitutions[i].add(Pair("french6", "${rootNote}7b5"))
-                passingChords[i].add(Pair("french6", "${rootNote}7b5"))
+                substitutions[i].add(Pair("french6", Chord("${rootNote}7b5")))
+                passingChords[i].add(Pair("french6", Chord("${rootNote}7b5")))
             }
 
             // Cadential 6-4
             if (degreeProgression[i].startsWith("V")) {
-                val chordName = scale.getChordAtDegree(0)
-                val chordNotes = chordHelper.getNotesForChord(chordName)
+                val chord = scale.getChordAtDegree(0)
+                val chordNotes = chord.notes
                 val fifth = chordNotes.removeLast()
                 chordNotes.add(0, fifth)
-                val newChordName = chordHelper.identifyChord(chordNotes, slashNotation = true)
+                val newChordName = Chord(notes=chordNotes)
                 passingChords[i].add(Pair("cadential64", newChordName))
             }
         }

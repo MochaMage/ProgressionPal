@@ -32,9 +32,8 @@ class Scale(private var root: String, private var mode: Mode = Mode.IONIAN) {
         }
     }
 
-    fun getChordAtDegree(degree: Int, seventh: Boolean = false): String {
+    fun getChordAtDegree(degree: Int, seventh: Boolean = false): Chord {
         val chordNotes: MutableList<String> = mutableListOf()
-        val chordHelper = ChordHelper()
 
         val steps = when(seventh) {
             true -> 4
@@ -47,6 +46,6 @@ class Scale(private var root: String, private var mode: Mode = Mode.IONIAN) {
             chordNotes.add(note)
             idx += 2
         }
-        return chordHelper.identifyChord(chordNotes)
+        return Chord(notes=chordNotes)
     }
 }
