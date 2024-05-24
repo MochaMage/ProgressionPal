@@ -42,8 +42,8 @@ class SubstitutionHelper(private val key: String) {
         return ""
     }
 
-    fun getNegativeHarmonyChord(chordName: String): Chord {
-        val chordNotes: MutableList<String> = Chord(chordName).notes
+    fun getNegativeHarmonyChord(chord: Chord): Chord {
+        val chordNotes: MutableList<String> = chord.notes
         val negativeHarmonyChordNotes: MutableList<String> = mutableListOf()
 
         for (note in chordNotes) {

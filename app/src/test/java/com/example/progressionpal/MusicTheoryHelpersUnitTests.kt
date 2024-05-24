@@ -91,15 +91,15 @@ class UnitTests {
     @Test
     fun testGetNegativeHarmonyChord(){
         val subHelper = SubstitutionHelper("C")
-        var result = subHelper.getNegativeHarmonyChord("C")
+        var result = subHelper.getNegativeHarmonyChord(Chord("C"))
         assertEquals(result.name, "Cm/G")
-        result = subHelper.getNegativeHarmonyChord("Dm")
+        result = subHelper.getNegativeHarmonyChord(Chord("Dm"))
         assertEquals(result.name, "Bb/F")
-        result = subHelper.getNegativeHarmonyChord("G")
+        result = subHelper.getNegativeHarmonyChord(Chord("G"))
         assertEquals(result.name, "Fm/C")
-        result = subHelper.getNegativeHarmonyChord("Bdim7")
+        result = subHelper.getNegativeHarmonyChord(Chord("Bdim7"))
         assertEquals(result.name, "Bdim7/Ab")
-        result = subHelper.getNegativeHarmonyChord("Em")
+        result = subHelper.getNegativeHarmonyChord(Chord("Em"))
         assertEquals(result.name, "Ab/Eb")
     }
 
@@ -173,13 +173,15 @@ class UnitTests {
     @Test
     fun testProgression(){
         val progression = Progression("A", Mode.AEOLIAN)
-        progression.addChord("Am")
-        progression.addChord("Dm")
-        progression.addChord("E7")
-        progression.addChord("Am")
-        println(progression.chordProgression)
-        println(progression.degreeProgression)
-        println(progression.findSubstitutionsAndPassingChords())
+        progression.addChord(Chord("Am"))
+        progression.addChord(Chord("Dm"))
+        progression.addChord(Chord("E7"))
+        progression.addChord(Chord("Am"))
+        val retval = progression.findSubstitutionsAndPassingChords()
+        for (i in progression.chordProgression.indices) {
+            val chord = progression.chordProgression[i]
+            println("${chord.name} \n \tSubstitutions: ${retval["substitutions"]!![i]}\n\n\tPassing Chords: ${retval["passingChords"]!![i]}")
+        }
     }
 
     @Test

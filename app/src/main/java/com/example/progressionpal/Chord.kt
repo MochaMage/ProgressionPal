@@ -2,6 +2,7 @@ package com.example.progressionpal
 
 data class Chord(var name: String = "",
                  var notes: MutableList<String> = mutableListOf(),
+                 var root: String = "",
                  val intervals: MutableList<Interval> = mutableListOf(),
                  var quality: ChordQuality = ChordQuality.MAJOR,
                  var bass: String = "",
@@ -25,8 +26,8 @@ data class Chord(var name: String = "",
         }
     }
 
-    fun setHarmonicFunction(degree: Int) {
-
+    override fun toString(): String {
+        return name
     }
 
     fun isSuspendedChord(): Boolean {
@@ -49,6 +50,7 @@ data class Chord(var name: String = "",
 
         var rootNote = rootNoteGroup!!.value
         this.bass = rootNote
+        this.root = rootNote
         if(accidentalGroup != null){
             rootNote += accidentalGroup.value
         }
@@ -179,12 +181,11 @@ data class Chord(var name: String = "",
             this.bass = firstNote
         }
 
-        // If sixths are found and the chord doesn't also contain a perfect fifth
-        // we invert them until we get the root in the first position
+        // If sixths are found, we invert them until we get the root in the first position
         // Same goes for a chord containing both a third and a fourth. Invert it until we get the
         // expected sus chord.
         val sixthNote = intervals.intersect(setOf(Interval.MINOR_SIXTH, Interval.MAJOR_SIXTH))
-        if (sixthNote.isNotEmpty() && !intervals.contains(Interval.PERFECT_FIFTH)) {
+        if (sixthNote.isNotEmpty()) {
             return "${identifyChord(reorderNotes(notes, intervals, sixthNote.first()))}${slashNote}"
         }
 
@@ -193,6 +194,7 @@ data class Chord(var name: String = "",
         }
 
         val rootNote = notes[0]
+        this.root = rootNote
         var extension = ""
         var suspensionType = ""
         var qualityType = ""
@@ -201,8 +203,6 @@ data class Chord(var name: String = "",
             extension = "7"
         } else if (intervals.contains(Interval.MAJOR_SEVENTH)) {
             extension = "M7"
-        } else if (intervals.contains(Interval.MAJOR_SIXTH)) {
-            extension = "6"
         }
 
         if (intervals.contains(Interval.AUGMENTED_FIFTH)) {
